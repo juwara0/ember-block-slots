@@ -1,8 +1,11 @@
 {
   "name": "ember-block-slots",
   "dependencies": {
-    "ember": "~2.5.0",
+    "ember": "components/ember#beta",
     "ember-cli-shims": "0.1.1"
+  },
+  "resolutions": {
+    "ember": "beta"
   },
   "devDependencies": {
     "blanket": "5e94fc30f2e694bb5c3718ddcbf60d467f4b4d26",

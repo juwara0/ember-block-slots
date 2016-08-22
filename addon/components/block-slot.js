@@ -10,6 +10,7 @@ import layout from '../templates/components/block-slot'
 import { PropTypes } from 'ember-prop-types'
 import Slots from '../mixins/slots'
 import YieldSlot from './yield-slot'
+import TagName from '../mixins/tag-name'
 
 /**
  * A block slot provides content for a target yield slot with a matching name
@@ -18,12 +19,11 @@ import YieldSlot from './yield-slot'
  *
  * Block slots may also use block params, see addon/helpers/block-params.js
  */
-const BlockSlot = Component.extend({
+const BlockSlot = Component.extend(TagName, {
 
   // == Component properties ==================================================
 
   layout,
-  tagName: '',
 
   // == State properties ======================================================
 
@@ -37,7 +37,14 @@ const BlockSlot = Component.extend({
 
   // == Events ================================================================
 
-  _init: on('init', function () {
+  init () {
+    // Once PR https://github.com/emberjs/ember.js/pull/14108 is merged, move setTagName()
+    // after the call for this._super() and verify that Element Id is not set on a tagless
+    // component causing an error on this assertion:
+    // https://github.com/emberjs/ember.js/blame/3d25f9805cf1eb37a3f5ae6e05e3e2646b4f6175/packages/ember-htmlbars/lib/system/build-component-template.js#L42
+    this.setTagName()
+    this._super(...arguments)
+
     // Active the yield slot using the slots interface
     const slottedComponent = this.nearestOfType(Slots)
     if (!slottedComponent._isRegistered(this._name)) {
@@ -76,9 +83,11 @@ const BlockSlot = Component.extend({
         })
       }
     }
-  }),
+  },
 
-  _willDestroyElement: on('willDestroyElement', function () {
+  willDestroyElement () {
+    this._super(...arguments)
+
     const slottedComponent = this.get('slottedComponent')
     if (slottedComponent) {
       // Deactivate the yield slot using the slots interface when the block
@@ -86,7 +95,7 @@ const BlockSlot = Component.extend({
       // dynamically
       slottedComponent._deactivateSlot(this._name)
     }
-  })
+  }
 })
 
 BlockSlot.reopenClass({
